@@ -62,46 +62,57 @@ const heroTypes = [
   {
     id: "knight",
     name: "Knight",
-    emoji: "⚔️",
+    emoji: "🤴", // Human knight
     hp: 100,
     damage: 25,
     speed: 1.5,
     cost: 50,
     color: "#ef4444",
-    size: 30,
+    size: 40, // Increased from 30
   },
   {
     id: "archer",
     name: "Archer",
-    emoji: "🏹",
+    emoji: "🧝‍♂️", // Human elf archer
     hp: 60,
     damage: 35,
     speed: 2.0,
     cost: 40,
     color: "#22c55e",
-    size: 25,
+    size: 38, // Increased from 25
   },
   {
     id: "mage",
     name: "Mage",
-    emoji: "🧙‍♂️",
+    emoji: "🧙‍♂️", // Human wizard (already human)
     hp: 50,
     damage: 45,
     speed: 1.8,
     cost: 60,
     color: "#3b82f6",
-    size: 28,
+    size: 40, // Increased from 28
+  },
+  {
+    id: "warrior",
+    name: "Warrior",
+    emoji: "🥷", // Human ninja warrior
+    hp: 80,
+    damage: 30,
+    speed: 2.2,
+    cost: 45,
+    color: "#8b5cf6",
+    size: 38,
   },
   {
     id: "tank",
-    name: "Tank",
-    emoji: "🛡️",
+    name: "Guardian",
+    emoji: "🛡️👨", // Human with shield (or we can use a single human emoji)
     hp: 200,
     damage: 15,
     speed: 1.0,
     cost: 80,
-    color: "#8b5cf6",
-    size: 35,
+    color: "#f59e0b",
+    size: 45, // Increased from 35
   },
 ]
 
@@ -115,7 +126,7 @@ const villainTypes = [
     damage: 15,
     speed: 2.0,
     color: "#dc2626",
-    size: 22,
+    size: 35, // Increased from 22
   },
   {
     id: "orc",
@@ -125,7 +136,7 @@ const villainTypes = [
     damage: 25,
     speed: 1.5,
     color: "#16a34a",
-    size: 28,
+    size: 40, // Increased from 28
   },
   {
     id: "troll",
@@ -135,7 +146,7 @@ const villainTypes = [
     damage: 35,
     speed: 1.2,
     color: "#0891b2",
-    size: 35,
+    size: 45, // Increased from 35
   },
   {
     id: "dragon",
@@ -145,7 +156,7 @@ const villainTypes = [
     damage: 50,
     speed: 0.8,
     color: "#7f1d1d",
-    size: 50,
+    size: 60, // Increased from 50
   },
 ]
 
@@ -573,7 +584,7 @@ export default function TowerDefenseGame({
         })
         return updated
       })
-    }, [100])
+    }, [])
 
     return () => clearInterval(interval)
   }, [])
