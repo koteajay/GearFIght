@@ -57,45 +57,45 @@ interface Superpower {
   description: string
 }
 
-// Hero types that can be spawned
+// Hero types that can be spawned (come from LEFT)
 const heroTypes = [
   {
     id: "knight",
     name: "Knight",
-    emoji: "🤴", // Human knight
+    emoji: "🤴",
     hp: 100,
     damage: 25,
     speed: 1.5,
     cost: 50,
     color: "#ef4444",
-    size: 40, // Increased from 30
+    size: 40,
   },
   {
     id: "archer",
     name: "Archer",
-    emoji: "🧝‍♂️", // Human elf archer
+    emoji: "🧝‍♂️",
     hp: 60,
     damage: 35,
     speed: 2.0,
     cost: 40,
     color: "#22c55e",
-    size: 38, // Increased from 25
+    size: 38,
   },
   {
     id: "mage",
     name: "Mage",
-    emoji: "🧙‍♂️", // Human wizard (already human)
+    emoji: "🧙‍♂️",
     hp: 50,
     damage: 45,
     speed: 1.8,
     cost: 60,
     color: "#3b82f6",
-    size: 40, // Increased from 28
+    size: 40,
   },
   {
     id: "warrior",
     name: "Warrior",
-    emoji: "🥷", // Human ninja warrior
+    emoji: "🥷",
     hp: 80,
     damage: 30,
     speed: 2.2,
@@ -106,17 +106,17 @@ const heroTypes = [
   {
     id: "tank",
     name: "Guardian",
-    emoji: "🛡️👨", // Human with shield (or we can use a single human emoji)
+    emoji: "🛡️",
     hp: 200,
     damage: 15,
     speed: 1.0,
     cost: 80,
     color: "#f59e0b",
-    size: 45, // Increased from 35
+    size: 45,
   },
 ]
 
-// Villain types that spawn from left
+// Villain types that spawn from RIGHT
 const villainTypes = [
   {
     id: "goblin",
@@ -126,7 +126,7 @@ const villainTypes = [
     damage: 15,
     speed: 2.0,
     color: "#dc2626",
-    size: 35, // Increased from 22
+    size: 35,
   },
   {
     id: "orc",
@@ -136,7 +136,7 @@ const villainTypes = [
     damage: 25,
     speed: 1.5,
     color: "#16a34a",
-    size: 40, // Increased from 28
+    size: 40,
   },
   {
     id: "troll",
@@ -146,7 +146,7 @@ const villainTypes = [
     damage: 35,
     speed: 1.2,
     color: "#0891b2",
-    size: 45, // Increased from 35
+    size: 45,
   },
   {
     id: "dragon",
@@ -156,7 +156,7 @@ const villainTypes = [
     damage: 50,
     speed: 0.8,
     color: "#7f1d1d",
-    size: 60, // Increased from 50
+    size: 60,
   },
 ]
 
@@ -208,7 +208,6 @@ export default function TowerDefenseGame({
 }: TowerDefenseGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const gameLoopRef = useRef<number>()
-  const lastSpawnTimeRef = useRef<number>(0)
 
   const [gameState, setGameState] = useState<"playing" | "paused" | "gameOver" | "victory" | "waveComplete">("playing")
   const [wave, setWave] = useState(1)
@@ -218,30 +217,44 @@ export default function TowerDefenseGame({
   const [units, setUnits] = useState<Unit[]>([])
   const [projectiles, setProjectiles] = useState<Projectile[]>([])
   const [superpowerCooldowns, setSuperpowerCooldowns] = useState<Record<string, number>>({})
+  const [waveVillains, setWaveVillains] = useState<number>(0) // Track villains spawned this wave
+  const [waveStarted, setWaveStarted] = useState<boolean>(false)
 
   const maxWaves = difficulty === "easy" ? 5 : difficulty === "medium" ? 10 : 15
-  const spawnRate = difficulty === "easy" ? 4000 : difficulty === "medium" ? 3000 : 2000
 
-  const spawnVillain = useCallback(() => {
-    const villainType = villainTypes[Math.floor(Math.random() * villainTypes.length)]
-    const newVillain: Unit = {
-      id: `villain-${Date.now()}-${Math.random()}`,
-      x: -50,
-      y: GROUND_Y - villainType.size,
-      hp: villainType.hp + wave * 20,
-      maxHp: villainType.hp + wave * 20,
-      damage: villainType.damage + wave * 5,
-      speed: villainType.speed + wave * 0.1,
-      type: "villain",
-      unitType: villainType.id,
-      emoji: villainType.emoji,
-      color: villainType.color,
-      size: villainType.size,
-      attackCooldown: 0,
-      isAttacking: false,
+  // Calculate villains per wave (like original GearFight)
+  const getVillainsForWave = (waveNum: number) => {
+    return Math.min(3 + waveNum, 8) // Wave 1: 4, Wave 2: 5, etc., max 8
+  }
+
+  const spawnWaveVillains = useCallback(() => {
+    const villainsToSpawn = getVillainsForWave(wave)
+    const newVillains: Unit[] = []
+
+    for (let i = 0; i < villainsToSpawn; i++) {
+      const villainType = villainTypes[Math.floor(Math.random() * villainTypes.length)]
+      const newVillain: Unit = {
+        id: `villain-${wave}-${i}`,
+        x: CANVAS_WIDTH + 50 + i * 60, // Spawn with spacing
+        y: GROUND_Y - villainType.size,
+        hp: villainType.hp + wave * 15,
+        maxHp: villainType.hp + wave * 15,
+        damage: villainType.damage + wave * 3,
+        speed: villainType.speed + wave * 0.05,
+        type: "villain",
+        unitType: villainType.id,
+        emoji: villainType.emoji,
+        color: villainType.color,
+        size: villainType.size,
+        attackCooldown: 0,
+        isAttacking: false,
+      }
+      newVillains.push(newVillain)
     }
 
-    setUnits((prev) => [...prev, newVillain])
+    setUnits((prev) => [...prev, ...newVillains])
+    setWaveVillains(villainsToSpawn)
+    setWaveStarted(true)
   }, [wave])
 
   const spawnHero = (heroType: any) => {
@@ -249,7 +262,7 @@ export default function TowerDefenseGame({
 
     const newHero: Unit = {
       id: `hero-${Date.now()}-${Math.random()}`,
-      x: CANVAS_WIDTH + 50,
+      x: -50,
       y: GROUND_Y - heroType.size,
       hp: heroType.hp,
       maxHp: heroType.hp,
@@ -345,7 +358,9 @@ export default function TowerDefenseGame({
   const startNextWave = () => {
     setWave((prev) => prev + 1)
     setGameState("playing")
-    setCurrency((prev) => prev + 50) // Bonus currency for new wave
+    setCurrency((prev) => prev + 50)
+    setWaveStarted(false)
+    setWaveVillains(0)
   }
 
   const gameLoop = useCallback(() => {
@@ -357,13 +372,11 @@ export default function TowerDefenseGame({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const currentTime = Date.now()
-
     // Clear canvas with battlefield background
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0)
-    gradient.addColorStop(0, "#1e3a8a") // Blue (hero side)
+    gradient.addColorStop(0, "#1e3a8a") // Blue (hero side - LEFT)
     gradient.addColorStop(0.5, "#374151") // Gray (battlefield)
-    gradient.addColorStop(1, "#7f1d1d") // Red (villain side)
+    gradient.addColorStop(1, "#7f1d1d") // Red (villain side - RIGHT)
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -381,41 +394,43 @@ export default function TowerDefenseGame({
     ctx.stroke()
     ctx.setLineDash([])
 
-    // Spawn villains automatically
-    if (currentTime - lastSpawnTimeRef.current > spawnRate) {
-      spawnVillain()
-      lastSpawnTimeRef.current = currentTime
+    // Spawn wave villains if not started
+    if (!waveStarted) {
+      spawnWaveVillains()
     }
 
     // Update units
     setUnits((prevUnits) => {
       return prevUnits.filter((unit) => {
-        // Move units
-        if (unit.type === "villain") {
-          unit.x += unit.speed
-          // Check if villain reached the right side (player base)
-          if (unit.x > CANVAS_WIDTH) {
-            setBaseHp((prev) => Math.max(0, prev - unit.damage))
-            return false
+        // Find nearest enemy to fight
+        const enemies = prevUnits.filter((u) => u.type !== unit.type && u.hp > 0)
+        const nearestEnemy = enemies
+          .filter((enemy) => Math.abs(enemy.x - unit.x) < 80)
+          .sort((a, b) => Math.abs(a.x - unit.x) - Math.abs(b.x - unit.x))[0]
+
+        unit.target = nearestEnemy
+
+        // Move only if no target nearby
+        if (!unit.target) {
+          unit.isAttacking = false
+          if (unit.type === "hero") {
+            unit.x += unit.speed // Heroes move RIGHT
+            // Check if hero reached the right side (enemy base)
+            if (unit.x > CANVAS_WIDTH) {
+              setScore((prev) => prev + 50)
+              setCurrency((prev) => prev + 20)
+              return false
+            }
+          } else {
+            unit.x -= unit.speed // Villains move LEFT
+            // Check if villain reached the left side (player base)
+            if (unit.x < 0) {
+              setBaseHp((prev) => Math.max(0, prev - unit.damage))
+              return false
+            }
           }
         } else {
-          unit.x -= unit.speed
-          // Check if hero reached the left side (enemy base)
-          if (unit.x < 0) {
-            setScore((prev) => prev + 50)
-            setCurrency((prev) => prev + 20)
-            return false
-          }
-        }
-
-        // Find nearest enemy to fight
-        if (!unit.target || unit.target.hp <= 0) {
-          const enemies = prevUnits.filter((u) => u.type !== unit.type && u.hp > 0 && Math.abs(u.x - unit.x) < 100)
-          unit.target = enemies.sort((a, b) => Math.abs(a.x - unit.x) - Math.abs(b.x - unit.x))[0]
-        }
-
-        // Combat logic
-        if (unit.target && Math.abs(unit.x - unit.target.x) < 60) {
+          // Combat logic
           unit.isAttacking = true
           if (unit.attackCooldown <= 0) {
             // Ranged attack for archers and mages
@@ -426,8 +441,8 @@ export default function TowerDefenseGame({
                   id: `proj-${Date.now()}-${Math.random()}`,
                   x: unit.x,
                   y: unit.y + unit.size / 2,
-                  targetX: unit.target!.x,
-                  targetY: unit.target!.y + unit.target!.size / 2,
+                  targetX: unit.target.x,
+                  targetY: unit.target.y + unit.target.size / 2,
                   damage: unit.damage,
                   speed: 8,
                   color: unit.color,
@@ -441,13 +456,10 @@ export default function TowerDefenseGame({
                   setScore((prev) => prev + 25)
                   setCurrency((prev) => prev + 10)
                 }
-                unit.target = undefined
               }
             }
             unit.attackCooldown = 60 // 1 second at 60fps
           }
-        } else {
-          unit.isAttacking = false
         }
 
         if (unit.attackCooldown > 0) {
@@ -525,6 +537,29 @@ export default function TowerDefenseGame({
         ctx.stroke()
         ctx.globalAlpha = 1
       }
+
+      // Movement indicator (only when not fighting)
+      if (!unit.target) {
+        ctx.strokeStyle = unit.type === "hero" ? "#22c55e" : "#dc2626"
+        ctx.lineWidth = 2
+        ctx.globalAlpha = 0.5
+        ctx.beginPath()
+        if (unit.type === "hero") {
+          // Arrow pointing right for heroes
+          ctx.moveTo(unit.x + unit.size / 2 + 5, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x + unit.size / 2 + 15, unit.y + unit.size / 2 - 5)
+          ctx.moveTo(unit.x + unit.size / 2 + 5, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x + unit.size / 2 + 15, unit.y + unit.size / 2 + 5)
+        } else {
+          // Arrow pointing left for villains
+          ctx.moveTo(unit.x - unit.size / 2 - 5, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x - unit.size / 2 - 15, unit.y + unit.size / 2 - 5)
+          ctx.moveTo(unit.x - unit.size / 2 - 5, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x - unit.size / 2 - 15, unit.y + unit.size / 2 + 5)
+        }
+        ctx.stroke()
+        ctx.globalAlpha = 1
+      }
     })
 
     // Draw projectiles
@@ -538,9 +573,9 @@ export default function TowerDefenseGame({
       ctx.shadowBlur = 0
     })
 
-    // Check wave completion
-    const villainCount = units.filter((u) => u.type === "villain").length
-    if (villainCount === 0 && currentTime - lastSpawnTimeRef.current > spawnRate * 2) {
+    // Check wave completion - all villains must be dead
+    const aliveVillains = units.filter((u) => u.type === "villain" && u.hp > 0)
+    if (waveStarted && aliveVillains.length === 0) {
       if (wave >= maxWaves) {
         setGameState("victory")
         return
@@ -557,7 +592,7 @@ export default function TowerDefenseGame({
     }
 
     gameLoopRef.current = requestAnimationFrame(gameLoop)
-  }, [gameState, units, projectiles, wave, maxWaves, baseHp, spawnRate, spawnVillain])
+  }, [gameState, units, projectiles, wave, maxWaves, baseHp, waveStarted, spawnWaveVillains])
 
   const canUseSuperpower = (superpower: Superpower) => {
     const cooldownRemaining = superpowerCooldowns[superpower.id] || 0
@@ -565,9 +600,7 @@ export default function TowerDefenseGame({
   }
 
   const handleSuperpowerClick = (power: Superpower) => {
-    if (canUseSuperpower(power)) {
-      useSuperpower(power)
-    }
+    useSuperpower(power)
   }
 
   const handleEndFight = () => {
@@ -575,19 +608,23 @@ export default function TowerDefenseGame({
     onFightEnd(score, earnedCurrency)
   }
 
+  const decrementCooldowns = useCallback(() => {
+    setSuperpowerCooldowns((prev) => {
+      const updated = { ...prev }
+      Object.keys(updated).forEach((key) => {
+        updated[key] = Math.max(0, updated[key] - 100)
+      })
+      return updated
+    })
+  }, [])
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setSuperpowerCooldowns((prev) => {
-        const updated = { ...prev }
-        Object.keys(updated).forEach((key) => {
-          updated[key] = Math.max(0, updated[key] - 100)
-        })
-        return updated
-      })
-    }, [])
+      decrementCooldowns()
+    }, 100)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [decrementCooldowns])
 
   useEffect(() => {
     if (gameState === "playing") {
@@ -649,6 +686,27 @@ export default function TowerDefenseGame({
 
         {/* Side Panel */}
         <div className="w-96 bg-black/50 backdrop-blur-sm p-6 space-y-6">
+          {/* Wave Info */}
+          <Card className="bg-black/40 border-yellow-500/50">
+            <CardContent className="p-4">
+              <h3 className="text-xl font-bold mb-4 text-yellow-400">🌊 Wave Info</h3>
+              <div className="space-y-2 text-white">
+                <div className="flex justify-between">
+                  <span>Villains This Wave:</span>
+                  <span className="text-red-400">{getVillainsForWave(wave)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Remaining:</span>
+                  <span className="text-red-400">{units.filter((u) => u.type === "villain").length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Heroes Active:</span>
+                  <span className="text-blue-400">{units.filter((u) => u.type === "hero").length}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Hero Spawner */}
           <Card className="bg-black/40 border-blue-500/50">
             <CardContent className="p-4">
@@ -694,6 +752,10 @@ export default function TowerDefenseGame({
                   <span>Projectiles:</span>
                   <span className="text-yellow-400">{projectiles.length}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Fighting:</span>
+                  <span className="text-orange-400">{units.filter((u) => u.isAttacking).length}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -734,9 +796,9 @@ export default function TowerDefenseGame({
       {/* Instructions */}
       <div className="p-3 bg-black/50 text-center text-white">
         <div className="flex justify-center gap-8">
-          <span>👹 Villains spawn from LEFT and move RIGHT</span>
-          <span>⚔️ Heroes spawn from RIGHT and move LEFT</span>
-          <span>💥 They fight automatically when they meet!</span>
+          <span>🤴 Heroes spawn from LEFT and move RIGHT</span>
+          <span>👹 Villains spawn from RIGHT and move LEFT</span>
+          <span>⚔️ Fixed {getVillainsForWave(wave)} villains per wave!</span>
         </div>
       </div>
 
@@ -754,6 +816,9 @@ export default function TowerDefenseGame({
                 <span className="text-blue-400 font-bold">
                   {wave + 1}/{maxWaves}
                 </span>
+              </p>
+              <p className="text-white">
+                Next Wave Villains: <span className="text-red-400 font-bold">{getVillainsForWave(wave + 1)}</span>
               </p>
               <p className="text-green-400">Bonus: +50 coins for next wave!</p>
             </div>
