@@ -14,9 +14,9 @@ interface TowerDefenseGameProps {
   onBack: () => void
 }
 
-const CANVAS_WIDTH = 1000
-const CANVAS_HEIGHT = 600
-const GROUND_Y = 500
+const CANVAS_WIDTH = 900
+const CANVAS_HEIGHT = 500
+const GROUND_Y = 400
 
 interface Unit {
   id: string
@@ -57,106 +57,106 @@ interface Superpower {
   description: string
 }
 
-// Hero types that can be spawned (come from LEFT)
+// Hero types - BALANCED for medium difficulty
 const heroTypes = [
   {
     id: "knight",
     name: "Knight",
     emoji: "🤴",
-    hp: 100,
-    damage: 25,
-    speed: 1.5,
-    cost: 50,
+    hp: 120,
+    damage: 30,
+    speed: 1.8,
+    cost: 40,
     color: "#ef4444",
-    size: 40,
+    size: 35,
   },
   {
     id: "archer",
     name: "Archer",
     emoji: "🧝‍♂️",
-    hp: 60,
-    damage: 35,
-    speed: 2.0,
-    cost: 40,
+    hp: 80,
+    damage: 40,
+    speed: 2.2,
+    cost: 35,
     color: "#22c55e",
-    size: 38,
+    size: 32,
   },
   {
     id: "mage",
     name: "Mage",
     emoji: "🧙‍♂️",
-    hp: 50,
-    damage: 45,
-    speed: 1.8,
-    cost: 60,
+    hp: 70,
+    damage: 50,
+    speed: 2.0,
+    cost: 45,
     color: "#3b82f6",
-    size: 40,
+    size: 35,
   },
   {
     id: "warrior",
     name: "Warrior",
     emoji: "🥷",
-    hp: 80,
-    damage: 30,
-    speed: 2.2,
-    cost: 45,
+    hp: 100,
+    damage: 35,
+    speed: 2.5,
+    cost: 38,
     color: "#8b5cf6",
-    size: 38,
+    size: 32,
   },
   {
     id: "tank",
     name: "Guardian",
     emoji: "🛡️",
-    hp: 200,
-    damage: 15,
-    speed: 1.0,
-    cost: 80,
+    hp: 180,
+    damage: 25,
+    speed: 1.5,
+    cost: 55,
     color: "#f59e0b",
-    size: 45,
+    size: 38,
   },
 ]
 
-// Villain types that spawn from RIGHT
+// Villain types - BALANCED for medium difficulty
 const villainTypes = [
   {
     id: "goblin",
     name: "Goblin",
     emoji: "👹",
-    hp: 40,
-    damage: 15,
-    speed: 2.0,
+    hp: 35,
+    damage: 12,
+    speed: 1.8,
     color: "#dc2626",
-    size: 35,
+    size: 30,
   },
   {
     id: "orc",
     name: "Orc",
     emoji: "🧌",
-    hp: 80,
-    damage: 25,
-    speed: 1.5,
+    hp: 60,
+    damage: 18,
+    speed: 1.4,
     color: "#16a34a",
-    size: 40,
+    size: 35,
   },
   {
     id: "troll",
     name: "Troll",
     emoji: "🧟",
-    hp: 150,
-    damage: 35,
-    speed: 1.2,
+    hp: 100,
+    damage: 25,
+    speed: 1.1,
     color: "#0891b2",
-    size: 45,
+    size: 40,
   },
   {
     id: "dragon",
     name: "Dragon",
     emoji: "🐉",
-    hp: 300,
-    damage: 50,
-    speed: 0.8,
+    hp: 200,
+    damage: 35,
+    speed: 0.7,
     color: "#7f1d1d",
-    size: 60,
+    size: 50,
   },
 ]
 
@@ -165,27 +165,27 @@ const superpowers: Superpower[] = [
     id: "rocket",
     name: "Rocket Strike",
     type: "rocket",
-    damage: 150,
-    cost: 100,
-    cooldown: 15000,
-    description: "Massive area damage to enemies",
+    damage: 120,
+    cost: 70,
+    cooldown: 12000,
+    description: "Area damage to enemies",
   },
   {
     id: "lightning",
     name: "Lightning Chain",
     type: "lightning",
     damage: 80,
-    cost: 80,
-    cooldown: 12000,
+    cost: 60,
+    cooldown: 10000,
     description: "Chain lightning through enemies",
   },
   {
     id: "freeze",
     name: "Ice Storm",
     type: "freeze",
-    damage: 30,
-    cost: 60,
-    cooldown: 18000,
+    damage: 40,
+    cost: 50,
+    cooldown: 15000,
     description: "Slows and damages all enemies",
   },
   {
@@ -193,8 +193,8 @@ const superpowers: Superpower[] = [
     name: "Battle Heal",
     type: "heal",
     damage: 0,
-    cost: 70,
-    cooldown: 20000,
+    cost: 55,
+    cooldown: 14000,
     description: "Heals all heroes",
   },
 ]
@@ -213,18 +213,20 @@ export default function TowerDefenseGame({
   const [wave, setWave] = useState(1)
   const [score, setScore] = useState(0)
   const [baseHp, setBaseHp] = useState(100)
-  const [currency, setCurrency] = useState(200)
+  const [currency, setCurrency] = useState(250)
   const [units, setUnits] = useState<Unit[]>([])
   const [projectiles, setProjectiles] = useState<Projectile[]>([])
   const [superpowerCooldowns, setSuperpowerCooldowns] = useState<Record<string, number>>({})
-  const [waveVillains, setWaveVillains] = useState<number>(0) // Track villains spawned this wave
+  const [waveVillains, setWaveVillains] = useState<number>(0)
   const [waveStarted, setWaveStarted] = useState<boolean>(false)
 
-  const maxWaves = difficulty === "easy" ? 5 : difficulty === "medium" ? 10 : 15
+  const maxWaves = difficulty === "easy" ? 5 : difficulty === "medium" ? 8 : 12
 
-  // Calculate villains per wave (like original GearFight)
+  // Calculate villains per wave - BALANCED
   const getVillainsForWave = (waveNum: number) => {
-    return Math.min(3 + waveNum, 8) // Wave 1: 4, Wave 2: 5, etc., max 8
+    if (waveNum === 1) return 3 // Wave 1: 3 villains
+    if (waveNum === 2) return 4 // Wave 2: 4 villains
+    return Math.min(3 + waveNum, 7) // Max 7 villains per wave
   }
 
   const spawnWaveVillains = useCallback(() => {
@@ -232,15 +234,24 @@ export default function TowerDefenseGame({
     const newVillains: Unit[] = []
 
     for (let i = 0; i < villainsToSpawn; i++) {
-      const villainType = villainTypes[Math.floor(Math.random() * villainTypes.length)]
+      // Progressive villain difficulty
+      let villainType
+      if (wave <= 2) {
+        villainType = villainTypes[Math.floor(Math.random() * 2)] // Goblins and orcs
+      } else if (wave <= 5) {
+        villainType = villainTypes[Math.floor(Math.random() * 3)] // Add trolls
+      } else {
+        villainType = villainTypes[Math.floor(Math.random() * villainTypes.length)] // All types
+      }
+
       const newVillain: Unit = {
         id: `villain-${wave}-${i}`,
-        x: CANVAS_WIDTH + 50 + i * 60, // Spawn with spacing
+        x: CANVAS_WIDTH + 50 + i * 70,
         y: GROUND_Y - villainType.size,
-        hp: villainType.hp + wave * 15,
-        maxHp: villainType.hp + wave * 15,
+        hp: villainType.hp + wave * 8,
+        maxHp: villainType.hp + wave * 8,
         damage: villainType.damage + wave * 3,
-        speed: villainType.speed + wave * 0.05,
+        speed: villainType.speed + wave * 0.03,
         type: "villain",
         unitType: villainType.id,
         emoji: villainType.emoji,
@@ -297,7 +308,7 @@ export default function TowerDefenseGame({
           const centerX = villains.reduce((sum, v) => sum + v.x, 0) / villains.length
           setUnits((prev) =>
             prev.map((unit) => {
-              if (unit.type === "villain" && Math.abs(unit.x - centerX) < 150) {
+              if (unit.type === "villain" && Math.abs(unit.x - centerX) < 120) {
                 return { ...unit, hp: Math.max(0, unit.hp - superpower.damage) }
               }
               return unit
@@ -323,7 +334,7 @@ export default function TowerDefenseGame({
             if (unit.type === "villain") {
               return {
                 ...unit,
-                speed: unit.speed * 0.3,
+                speed: unit.speed * 0.4,
                 hp: Math.max(0, unit.hp - superpower.damage),
               }
             }
@@ -334,19 +345,19 @@ export default function TowerDefenseGame({
           setUnits((prev) =>
             prev.map((unit) => {
               if (unit.type === "villain") {
-                return { ...unit, speed: unit.speed / 0.3 }
+                return { ...unit, speed: unit.speed / 0.4 }
               }
               return unit
             }),
           )
-        }, 5000)
+        }, 6000)
         break
 
       case "heal":
         setUnits((prev) =>
           prev.map((unit) => {
             if (unit.type === "hero") {
-              return { ...unit, hp: Math.min(unit.maxHp, unit.hp + 100) }
+              return { ...unit, hp: Math.min(unit.maxHp, unit.hp + 80) }
             }
             return unit
           }),
@@ -358,7 +369,7 @@ export default function TowerDefenseGame({
   const startNextWave = () => {
     setWave((prev) => prev + 1)
     setGameState("playing")
-    setCurrency((prev) => prev + 50)
+    setCurrency((prev) => prev + 75)
     setWaveStarted(false)
     setWaveVillains(0)
   }
@@ -374,9 +385,9 @@ export default function TowerDefenseGame({
 
     // Clear canvas with battlefield background
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0)
-    gradient.addColorStop(0, "#1e3a8a") // Blue (hero side - LEFT)
-    gradient.addColorStop(0.5, "#374151") // Gray (battlefield)
-    gradient.addColorStop(1, "#7f1d1d") // Red (villain side - RIGHT)
+    gradient.addColorStop(0, "#1e3a8a")
+    gradient.addColorStop(0.5, "#374151")
+    gradient.addColorStop(1, "#7f1d1d")
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -386,8 +397,8 @@ export default function TowerDefenseGame({
 
     // Draw battlefield line
     ctx.strokeStyle = "#ffffff"
-    ctx.lineWidth = 3
-    ctx.setLineDash([10, 10])
+    ctx.lineWidth = 2
+    ctx.setLineDash([8, 8])
     ctx.beginPath()
     ctx.moveTo(canvas.width / 2, 0)
     ctx.lineTo(canvas.width / 2, canvas.height)
@@ -405,7 +416,7 @@ export default function TowerDefenseGame({
         // Find nearest enemy to fight
         const enemies = prevUnits.filter((u) => u.type !== unit.type && u.hp > 0)
         const nearestEnemy = enemies
-          .filter((enemy) => Math.abs(enemy.x - unit.x) < 80)
+          .filter((enemy) => Math.abs(enemy.x - unit.x) < 90)
           .sort((a, b) => Math.abs(a.x - unit.x) - Math.abs(b.x - unit.x))[0]
 
         unit.target = nearestEnemy
@@ -414,18 +425,16 @@ export default function TowerDefenseGame({
         if (!unit.target) {
           unit.isAttacking = false
           if (unit.type === "hero") {
-            unit.x += unit.speed // Heroes move RIGHT
-            // Check if hero reached the right side (enemy base)
+            unit.x += unit.speed
             if (unit.x > CANVAS_WIDTH) {
-              setScore((prev) => prev + 50)
-              setCurrency((prev) => prev + 20)
+              setScore((prev) => prev + 75)
+              setCurrency((prev) => prev + 30)
               return false
             }
           } else {
-            unit.x -= unit.speed // Villains move LEFT
-            // Check if villain reached the left side (player base)
+            unit.x -= unit.speed
             if (unit.x < 0) {
-              setBaseHp((prev) => Math.max(0, prev - unit.damage))
+              setBaseHp((prev) => Math.max(0, prev - Math.floor(unit.damage * 0.8)))
               return false
             }
           }
@@ -444,7 +453,7 @@ export default function TowerDefenseGame({
                   targetX: unit.target.x,
                   targetY: unit.target.y + unit.target.size / 2,
                   damage: unit.damage,
-                  speed: 8,
+                  speed: 9,
                   color: unit.color,
                 },
               ])
@@ -453,12 +462,12 @@ export default function TowerDefenseGame({
               unit.target.hp -= unit.damage
               if (unit.target.hp <= 0) {
                 if (unit.type === "hero") {
-                  setScore((prev) => prev + 25)
-                  setCurrency((prev) => prev + 10)
+                  setScore((prev) => prev + 35)
+                  setCurrency((prev) => prev + 15)
                 }
               }
             }
-            unit.attackCooldown = 60 // 1 second at 60fps
+            unit.attackCooldown = 45 // Medium attack speed
           }
         }
 
@@ -478,15 +487,14 @@ export default function TowerDefenseGame({
         const distance = Math.sqrt(dx * dx + dy * dy)
 
         if (distance < projectile.speed) {
-          // Hit target
           setUnits((prev) =>
             prev.map((unit) => {
               const hitDistance = Math.sqrt((unit.x - projectile.targetX) ** 2 + (unit.y - projectile.targetY) ** 2)
-              if (hitDistance < 30) {
+              if (hitDistance < 35) {
                 const newHp = Math.max(0, unit.hp - projectile.damage)
                 if (newHp === 0 && unit.hp > 0 && unit.type === "villain") {
-                  setScore((prev) => prev + 25)
-                  setCurrency((prev) => prev + 10)
+                  setScore((prev) => prev + 35)
+                  setCurrency((prev) => prev + 15)
                 }
                 return { ...unit, hp: newHp }
               }
@@ -520,12 +528,12 @@ export default function TowerDefenseGame({
       ctx.fillText(unit.emoji, unit.x, unit.y + unit.size / 2)
 
       // Health bar
-      const barWidth = unit.size + 10
+      const barWidth = unit.size + 8
       const barHeight = 6
       ctx.fillStyle = "#7f1d1d"
-      ctx.fillRect(unit.x - barWidth / 2, unit.y - 10, barWidth, barHeight)
+      ctx.fillRect(unit.x - barWidth / 2, unit.y - 12, barWidth, barHeight)
       ctx.fillStyle = unit.type === "hero" ? "#22c55e" : "#dc2626"
-      ctx.fillRect(unit.x - barWidth / 2, unit.y - 10, (unit.hp / unit.maxHp) * barWidth, barHeight)
+      ctx.fillRect(unit.x - barWidth / 2, unit.y - 12, (unit.hp / unit.maxHp) * barWidth, barHeight)
 
       // Attack indicator
       if (unit.isAttacking) {
@@ -533,29 +541,27 @@ export default function TowerDefenseGame({
         ctx.lineWidth = 3
         ctx.globalAlpha = 0.7
         ctx.beginPath()
-        ctx.arc(unit.x, unit.y + unit.size / 2, unit.size / 2 + 10, 0, Math.PI * 2)
+        ctx.arc(unit.x, unit.y + unit.size / 2, unit.size / 2 + 12, 0, Math.PI * 2)
         ctx.stroke()
         ctx.globalAlpha = 1
       }
 
-      // Movement indicator (only when not fighting)
+      // Movement indicator
       if (!unit.target) {
         ctx.strokeStyle = unit.type === "hero" ? "#22c55e" : "#dc2626"
         ctx.lineWidth = 2
-        ctx.globalAlpha = 0.5
+        ctx.globalAlpha = 0.6
         ctx.beginPath()
         if (unit.type === "hero") {
-          // Arrow pointing right for heroes
-          ctx.moveTo(unit.x + unit.size / 2 + 5, unit.y + unit.size / 2)
-          ctx.lineTo(unit.x + unit.size / 2 + 15, unit.y + unit.size / 2 - 5)
-          ctx.moveTo(unit.x + unit.size / 2 + 5, unit.y + unit.size / 2)
-          ctx.lineTo(unit.x + unit.size / 2 + 15, unit.y + unit.size / 2 + 5)
+          ctx.moveTo(unit.x + unit.size / 2 + 6, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x + unit.size / 2 + 16, unit.y + unit.size / 2 - 6)
+          ctx.moveTo(unit.x + unit.size / 2 + 6, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x + unit.size / 2 + 16, unit.y + unit.size / 2 + 6)
         } else {
-          // Arrow pointing left for villains
-          ctx.moveTo(unit.x - unit.size / 2 - 5, unit.y + unit.size / 2)
-          ctx.lineTo(unit.x - unit.size / 2 - 15, unit.y + unit.size / 2 - 5)
-          ctx.moveTo(unit.x - unit.size / 2 - 5, unit.y + unit.size / 2)
-          ctx.lineTo(unit.x - unit.size / 2 - 15, unit.y + unit.size / 2 + 5)
+          ctx.moveTo(unit.x - unit.size / 2 - 6, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x - unit.size / 2 - 16, unit.y + unit.size / 2 - 6)
+          ctx.moveTo(unit.x - unit.size / 2 - 6, unit.y + unit.size / 2)
+          ctx.lineTo(unit.x - unit.size / 2 - 16, unit.y + unit.size / 2 + 6)
         }
         ctx.stroke()
         ctx.globalAlpha = 1
@@ -566,14 +572,14 @@ export default function TowerDefenseGame({
     projectiles.forEach((projectile) => {
       ctx.fillStyle = projectile.color
       ctx.shadowColor = projectile.color
-      ctx.shadowBlur = 10
+      ctx.shadowBlur = 8
       ctx.beginPath()
-      ctx.arc(projectile.x, projectile.y, 4, 0, Math.PI * 2)
+      ctx.arc(projectile.x, projectile.y, 5, 0, Math.PI * 2)
       ctx.fill()
       ctx.shadowBlur = 0
     })
 
-    // Check wave completion - all villains must be dead
+    // Check wave completion
     const aliveVillains = units.filter((u) => u.type === "villain" && u.hp > 0)
     if (waveStarted && aliveVillains.length === 0) {
       if (wave >= maxWaves) {
@@ -603,12 +609,7 @@ export default function TowerDefenseGame({
     useSuperpower(power)
   }
 
-  const handleEndFight = () => {
-    const earnedCurrency = score + wave * 50
-    onFightEnd(score, earnedCurrency)
-  }
-
-  const decrementCooldowns = useCallback(() => {
+  const decrementCooldowns = () => {
     setSuperpowerCooldowns((prev) => {
       const updated = { ...prev }
       Object.keys(updated).forEach((key) => {
@@ -616,7 +617,7 @@ export default function TowerDefenseGame({
       })
       return updated
     })
-  }, [])
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -624,7 +625,7 @@ export default function TowerDefenseGame({
     }, 100)
 
     return () => clearInterval(interval)
-  }, [decrementCooldowns])
+  }, [])
 
   useEffect(() => {
     if (gameState === "playing") {
@@ -640,10 +641,15 @@ export default function TowerDefenseGame({
     }
   }, [gameLoop, gameState])
 
+  const handleEndFight = () => {
+    const earnedCurrency = score + wave * 75
+    onFightEnd(score, earnedCurrency)
+  }
+
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       {/* UI Header */}
-      <div className="flex items-center justify-between p-4 bg-black/50 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-4 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <Button onClick={onBack} variant="ghost" className="text-white hover:bg-white/20">
             <ArrowLeft className="mr-2" />
@@ -658,153 +664,155 @@ export default function TowerDefenseGame({
           </Button>
         </div>
 
-        <div className="flex gap-6 text-white">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 rounded-lg font-bold">
+        <div className="flex gap-4 text-white text-sm">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-3 py-1 rounded-lg font-bold">
             Wave {wave}/{maxWaves}
           </div>
-          <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-600 to-yellow-700 px-4 py-2 rounded-lg font-bold">
+          <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-600 to-yellow-700 px-3 py-1 rounded-lg font-bold">
             <span>🪙</span>
             {currency}
           </div>
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-4 py-2 rounded-lg font-bold">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-3 py-1 rounded-lg font-bold">
             Score: {score}
           </div>
-          <div className="bg-gradient-to-r from-red-600 to-red-700 px-4 py-2 rounded-lg font-bold">❤️ {baseHp}</div>
+          <div className="bg-gradient-to-r from-red-600 to-red-700 px-3 py-1 rounded-lg font-bold">❤️ {baseHp}</div>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 gap-4 p-4">
         {/* Game Canvas */}
-        <div className="flex-1 flex items-center justify-center p-4">
+        <div className="flex-1 flex items-start justify-center">
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="border-2 border-gray-600 rounded-lg shadow-2xl max-w-full max-h-full"
+            className="border-2 border-gray-600 rounded-lg shadow-2xl"
           />
         </div>
 
-        {/* Side Panel */}
-        <div className="w-96 bg-black/50 backdrop-blur-sm p-6 space-y-6">
-          {/* Wave Info */}
-          <Card className="bg-black/40 border-yellow-500/50">
-            <CardContent className="p-4">
-              <h3 className="text-xl font-bold mb-4 text-yellow-400">🌊 Wave Info</h3>
-              <div className="space-y-2 text-white">
-                <div className="flex justify-between">
-                  <span>Villains This Wave:</span>
-                  <span className="text-red-400">{getVillainsForWave(wave)}</span>
+        {/* Side Panel - SCROLLABLE */}
+        <div className="w-80 max-h-[calc(100vh-120px)] overflow-y-auto bg-black/50 backdrop-blur-sm rounded-lg">
+          <div className="p-4 space-y-4">
+            {/* Wave Info */}
+            <Card className="bg-black/40 border-yellow-500/50">
+              <CardContent className="p-3">
+                <h3 className="text-lg font-bold mb-3 text-yellow-400">🌊 Wave Info</h3>
+                <div className="space-y-2 text-sm text-white">
+                  <div className="flex justify-between">
+                    <span>Villains This Wave:</span>
+                    <span className="text-red-400">{getVillainsForWave(wave)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remaining:</span>
+                    <span className="text-red-400">{units.filter((u) => u.type === "villain").length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Heroes Active:</span>
+                    <span className="text-blue-400">{units.filter((u) => u.type === "hero").length}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Remaining:</span>
-                  <span className="text-red-400">{units.filter((u) => u.type === "villain").length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Heroes Active:</span>
-                  <span className="text-blue-400">{units.filter((u) => u.type === "hero").length}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Hero Spawner */}
-          <Card className="bg-black/40 border-blue-500/50">
-            <CardContent className="p-4">
-              <h3 className="text-xl font-bold mb-4 text-blue-400">🏹 Spawn Heroes</h3>
-              <div className="space-y-3">
-                {heroTypes.map((hero) => (
-                  <Button
-                    key={hero.id}
-                    onClick={() => spawnHero(hero)}
-                    className="w-full justify-between p-4 h-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600"
-                    disabled={currency < hero.cost}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{hero.emoji}</span>
-                      <div className="text-left">
-                        <div className="font-bold">{hero.name}</div>
-                        <div className="text-xs text-gray-300">
-                          HP: {hero.hp} | DMG: {hero.damage} | SPD: {hero.speed}
+            {/* Hero Spawner */}
+            <Card className="bg-black/40 border-blue-500/50">
+              <CardContent className="p-3">
+                <h3 className="text-lg font-bold mb-3 text-blue-400">🏹 Spawn Heroes</h3>
+                <div className="space-y-2">
+                  {heroTypes.map((hero) => (
+                    <Button
+                      key={hero.id}
+                      onClick={() => spawnHero(hero)}
+                      className="w-full justify-between p-3 h-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-sm"
+                      disabled={currency < hero.cost}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{hero.emoji}</span>
+                        <div className="text-left">
+                          <div className="font-bold">{hero.name}</div>
+                          <div className="text-xs text-gray-300">
+                            HP: {hero.hp} | DMG: {hero.damage} | SPD: {hero.speed}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <span className="text-yellow-400 font-bold">{hero.cost}🪙</span>
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                      <span className="text-yellow-400 font-bold">{hero.cost}🪙</span>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Battle Stats */}
-          <Card className="bg-black/40 border-green-500/50">
-            <CardContent className="p-4">
-              <h3 className="text-xl font-bold mb-4 text-green-400">⚔️ Battle Stats</h3>
-              <div className="space-y-2 text-white">
-                <div className="flex justify-between">
-                  <span>Heroes:</span>
-                  <span className="text-blue-400">{units.filter((u) => u.type === "hero").length}</span>
+            {/* Battle Stats */}
+            <Card className="bg-black/40 border-green-500/50">
+              <CardContent className="p-3">
+                <h3 className="text-lg font-bold mb-3 text-green-400">⚔️ Battle Stats</h3>
+                <div className="space-y-2 text-sm text-white">
+                  <div className="flex justify-between">
+                    <span>Heroes:</span>
+                    <span className="text-blue-400">{units.filter((u) => u.type === "hero").length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Villains:</span>
+                    <span className="text-red-400">{units.filter((u) => u.type === "villain").length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Projectiles:</span>
+                    <span className="text-yellow-400">{projectiles.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fighting:</span>
+                    <span className="text-orange-400">{units.filter((u) => u.isAttacking).length}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Villains:</span>
-                  <span className="text-red-400">{units.filter((u) => u.type === "villain").length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Projectiles:</span>
-                  <span className="text-yellow-400">{projectiles.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Fighting:</span>
-                  <span className="text-orange-400">{units.filter((u) => u.isAttacking).length}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Superpowers */}
-          <Card className="bg-black/40 border-purple-500/50">
-            <CardContent className="p-4">
-              <h3 className="text-xl font-bold mb-4 text-purple-400">⚡ Superpowers</h3>
-              <div className="space-y-3">
-                {superpowers.map((power) => (
-                  <Button
-                    key={power.id}
-                    onClick={() => handleSuperpowerClick(power)}
-                    disabled={!canUseSuperpower(power)}
-                    className="w-full justify-between p-3 h-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-600 disabled:to-gray-700"
-                  >
-                    <div className="flex items-center gap-2">
-                      {power.type === "rocket" && <Target className="w-5 h-5" />}
-                      {power.type === "lightning" && <Zap className="w-5 h-5" />}
-                      {power.type === "freeze" && <Snowflake className="w-5 h-5" />}
-                      {power.type === "heal" && <Heart className="w-5 h-5" />}
-                      <span className="font-bold text-sm">{power.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-yellow-400 font-bold text-sm">{power.cost}🪙</div>
-                      {superpowerCooldowns[power.id] > 0 && (
-                        <div className="text-red-400 text-xs">{Math.ceil(superpowerCooldowns[power.id] / 1000)}s</div>
-                      )}
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Superpowers */}
+            <Card className="bg-black/40 border-purple-500/50">
+              <CardContent className="p-3">
+                <h3 className="text-lg font-bold mb-3 text-purple-400">⚡ Superpowers</h3>
+                <div className="space-y-2">
+                  {superpowers.map((power) => (
+                    <Button
+                      key={power.id}
+                      onClick={() => handleSuperpowerClick(power)}
+                      disabled={!canUseSuperpower(power)}
+                      className="w-full justify-between p-2 h-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-600 disabled:to-gray-700 text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        {power.type === "rocket" && <Target className="w-4 h-4" />}
+                        {power.type === "lightning" && <Zap className="w-4 h-4" />}
+                        {power.type === "freeze" && <Snowflake className="w-4 h-4" />}
+                        {power.type === "heal" && <Heart className="w-4 h-4" />}
+                        <span className="font-bold text-xs">{power.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-yellow-400 font-bold text-xs">{power.cost}🪙</div>
+                        {superpowerCooldowns[power.id] > 0 && (
+                          <div className="text-red-400 text-xs">{Math.ceil(superpowerCooldowns[power.id] / 1000)}s</div>
+                        )}
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
       {/* Instructions */}
-      <div className="p-3 bg-black/50 text-center text-white">
-        <div className="flex justify-center gap-8">
-          <span>🤴 Heroes spawn from LEFT and move RIGHT</span>
-          <span>👹 Villains spawn from RIGHT and move LEFT</span>
-          <span>⚔️ Fixed {getVillainsForWave(wave)} villains per wave!</span>
+      <div className="p-3 bg-black/50 text-center text-white text-sm">
+        <div className="flex justify-center gap-6">
+          <span>🤴 Heroes from LEFT</span>
+          <span>👹 Villains from RIGHT</span>
+          <span>⚔️ {getVillainsForWave(wave)} villains this wave</span>
         </div>
       </div>
 
       {/* Wave Complete Modal */}
       {gameState === "waveComplete" && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl text-center border border-gray-600 shadow-2xl">
             <h2 className="text-4xl font-bold mb-6 text-green-400">🎉 Wave {wave} Complete!</h2>
             <div className="space-y-3 mb-8 text-lg">
@@ -820,7 +828,7 @@ export default function TowerDefenseGame({
               <p className="text-white">
                 Next Wave Villains: <span className="text-red-400 font-bold">{getVillainsForWave(wave + 1)}</span>
               </p>
-              <p className="text-green-400">Bonus: +50 coins for next wave!</p>
+              <p className="text-green-400">Bonus: +75 coins!</p>
             </div>
             <div className="flex gap-4">
               <Button
@@ -839,7 +847,7 @@ export default function TowerDefenseGame({
 
       {/* Game Over Modal */}
       {(gameState === "gameOver" || gameState === "victory") && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl text-center border border-gray-600 shadow-2xl">
             <h2 className={`text-4xl font-bold mb-6 ${gameState === "victory" ? "text-green-400" : "text-red-400"}`}>
               {gameState === "victory" ? "🏆 Victory!" : "💀 Defeat!"}
@@ -851,10 +859,10 @@ export default function TowerDefenseGame({
               <p className="text-white">
                 Waves Completed:{" "}
                 <span className="text-blue-400 font-bold">
-                  {wave - 1}/{maxWaves}
+                  {gameState === "victory" ? maxWaves : wave - 1}/{maxWaves}
                 </span>
               </p>
-              <p className="text-yellow-400 font-bold">Currency Earned: {score + wave * 50}🪙</p>
+              <p className="text-yellow-400 font-bold">Currency Earned: {score + wave * 75}🪙</p>
             </div>
             <div className="flex gap-4">
               <Button
@@ -873,7 +881,7 @@ export default function TowerDefenseGame({
 
       {/* Pause Modal */}
       {gameState === "paused" && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl text-center border border-gray-600 shadow-2xl">
             <h2 className="text-4xl font-bold mb-6 text-white">⏸️ Paused</h2>
             <div className="flex gap-4">
