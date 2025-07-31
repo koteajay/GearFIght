@@ -4,50 +4,57 @@ import { useState } from "react"
 import LandingPage from "@/components/landing-page"
 import CharacterSelector from "@/components/character-selector"
 import GearSetup from "@/components/gear-setup"
-import TowerDefenseGame from "@/components/tower-defense-game"
 import DifficultySelector from "@/components/difficulty-selector"
+import TowerDefenseGame from "@/components/tower-defense-game"
 import type { GameState, Character, Gear } from "@/types/game"
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("landing")
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [equippedGear, setEquippedGear] = useState<Gear[]>([])
-  const [currency, setCurrency] = useState(100)
-  const [score, setScore] = useState(0)
+  const [currency, setCurrency] = useState(200)
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy")
 
-  const handleStartFight = () => {
-    if (selectedCharacter) {
-      setGameState("difficulty")
-    }
+  const handleCharacterSelect = (character: Character) => {
+    setSelectedCharacter(character)
+    setGameState("gear")
   }
 
-  const handleFightEnd = (earnedScore: number, earnedCurrency: number) => {
-    setScore((prev) => prev + earnedScore)
-    setCurrency((prev) => prev + earnedCurrency)
+  const handleGearEquip = (gear: Gear[]) => {
+    setEquippedGear(gear)
+  }
+
+  const handleCurrencyChange = (newCurrency: number) => {
+    setCurrency(newCurrency)
+  }
+
+  const handleDifficultySelect = (selectedDifficulty: "easy" | "medium" | "hard") => {
+    setDifficulty(selectedDifficulty)
+    setGameState("fighting")
+  }
+
+  const handleFightEnd = (score: number, earnedCurrency: number) => {
+    setCurrency(currency + earnedCurrency)
     setGameState("landing")
   }
 
+  const handleStartFight = () => {
+    setGameState("difficulty")
+  }
+
   return (
-    <div className="w-full h-screen bg-gray-900 text-white overflow-hidden">
+    <div className="min-h-screen">
       {gameState === "landing" && (
         <LandingPage
-          onStartFight={() => (selectedCharacter ? setGameState("difficulty") : setGameState("character"))}
-          onGearSetup={() => setGameState("gear")}
-          onCharacterSelect={() => setGameState("character")}
-          score={score}
+          onStartFight={() => setGameState("character")}
+          onGearSetup={() => setGameState("character")}
+          onViewScore={() => {}}
           currency={currency}
         />
       )}
 
       {gameState === "character" && (
-        <CharacterSelector
-          onCharacterSelect={(character) => {
-            setSelectedCharacter(character)
-            setGameState("gear")
-          }}
-          onBack={() => setGameState("landing")}
-        />
+        <CharacterSelector onCharacterSelect={handleCharacterSelect} onBack={() => setGameState("landing")} />
       )}
 
       {gameState === "gear" && (
@@ -55,21 +62,15 @@ export default function Home() {
           character={selectedCharacter}
           equippedGear={equippedGear}
           currency={currency}
-          onGearEquip={setEquippedGear}
-          onCurrencyChange={setCurrency}
+          onGearEquip={handleGearEquip}
+          onCurrencyChange={handleCurrencyChange}
           onStartFight={handleStartFight}
-          onBack={() => setGameState("landing")}
+          onBack={() => setGameState("character")}
         />
       )}
 
       {gameState === "difficulty" && (
-        <DifficultySelector
-          onDifficultySelect={(diff) => {
-            setDifficulty(diff)
-            setGameState("fighting")
-          }}
-          onBack={() => setGameState("landing")}
-        />
+        <DifficultySelector onDifficultySelect={handleDifficultySelect} onBack={() => setGameState("gear")} />
       )}
 
       {gameState === "fighting" && selectedCharacter && (

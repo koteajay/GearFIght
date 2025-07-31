@@ -17,8 +17,8 @@ interface TowerDefenseGameProps {
 const GRID_ROWS = 4
 const GRID_COLS = 6
 const CELL_SIZE = 80
-const CANVAS_WIDTH = 1000
-const CANVAS_HEIGHT = 700
+const CANVAS_WIDTH = 900
+const CANVAS_HEIGHT = 600
 
 // Available characters to place on grid
 const availableCharacters = [
@@ -103,6 +103,50 @@ const superpowers: Superpower[] = [
   },
 ]
 
+// Add villain types
+const villainTypes = [
+  {
+    type: "goblin" as const,
+    emoji: "👹",
+    health: 40,
+    speed: 2.0,
+    damage: 2,
+    color: "#dc2626",
+    size: 22,
+    reward: 10,
+  },
+  {
+    type: "orc" as const,
+    emoji: "🧌",
+    health: 80,
+    speed: 1.2,
+    damage: 4,
+    color: "#16a34a",
+    size: 28,
+    reward: 15,
+  },
+  {
+    type: "troll" as const,
+    emoji: "🧟",
+    health: 120,
+    speed: 0.8,
+    damage: 6,
+    color: "#0891b2",
+    size: 35,
+    reward: 25,
+  },
+  {
+    type: "dragon" as const,
+    emoji: "🐉",
+    health: 800,
+    speed: 0.6,
+    damage: 10,
+    color: "#7f1d1d",
+    size: 60,
+    reward: 100,
+  },
+]
+
 export default function TowerDefenseGame({
   character,
   equippedGear,
@@ -169,68 +213,34 @@ export default function TowerDefenseGame({
       let enemy: Enemy
 
       if (isBossWave) {
+        const dragon = villainTypes.find((v) => v.type === "dragon")!
         enemy = {
           id: `boss-${wave}-${i}`,
           x: CANVAS_WIDTH + 100,
           y: 150,
-          health: 800 + wave * 150,
-          maxHealth: 800 + wave * 150,
-          speed: 0.8,
-          damage: 8,
+          health: dragon.health + wave * 150,
+          maxHealth: dragon.health + wave * 150,
+          speed: dragon.speed,
+          damage: dragon.damage,
           type: "boss",
           pathIndex: 0,
-          color: "#7f1d1d",
-          size: 60,
+          color: dragon.color,
+          size: dragon.size,
         }
       } else {
-        const types = ["basic", "fast", "tank"] as const
-        const type = types[Math.floor(Math.random() * types.length)]
-
-        switch (type) {
-          case "fast":
-            enemy = {
-              id: `enemy-${wave}-${i}`,
-              x: CANVAS_WIDTH + i * 40,
-              y: 150,
-              health: 40 + wave * 8,
-              maxHealth: 40 + wave * 8,
-              speed: 2.5 + wave * 0.15,
-              damage: 2,
-              type: "fast",
-              pathIndex: 0,
-              color: "#dc2626",
-              size: 22,
-            }
-            break
-          case "tank":
-            enemy = {
-              id: `enemy-${wave}-${i}`,
-              x: CANVAS_WIDTH + i * 50,
-              y: 150,
-              health: 120 + wave * 25,
-              maxHealth: 120 + wave * 25,
-              speed: 1.0 + wave * 0.08,
-              damage: 4,
-              type: "tank",
-              pathIndex: 0,
-              color: "#0891b2",
-              size: 38,
-            }
-            break
-          default:
-            enemy = {
-              id: `enemy-${wave}-${i}`,
-              x: CANVAS_WIDTH + i * 45,
-              y: 150,
-              health: 70 + wave * 15,
-              maxHealth: 70 + wave * 15,
-              speed: 1.5 + wave * 0.1,
-              damage: 3,
-              type: "basic",
-              pathIndex: 0,
-              color: "#16a34a",
-              size: 28,
-            }
+        const villain = villainTypes[Math.floor(Math.random() * 3)] // Exclude dragon
+        enemy = {
+          id: `enemy-${wave}-${i}`,
+          x: CANVAS_WIDTH + i * 40,
+          y: 150,
+          health: villain.health + wave * 10,
+          maxHealth: villain.health + wave * 10,
+          speed: villain.speed + wave * 0.1,
+          damage: villain.damage,
+          type: villain.type as any,
+          pathIndex: 0,
+          color: villain.color,
+          size: villain.size,
         }
       }
       newEnemies.push(enemy)
@@ -496,6 +506,16 @@ export default function TowerDefenseGame({
           ctx.fillText(enemy.type[0].toUpperCase(), enemy.x, enemy.y + 3)
         }
 
+        // Draw villain emoji
+        const villain = villainTypes.find((v) => v.type === enemy.type) || villainTypes.find((v) => v.type === "dragon")
+        if (villain) {
+          ctx.font = `${enemy.size}px Arial`
+          ctx.textAlign = "center"
+          ctx.textBaseline = "middle"
+          ctx.fillStyle = "#ffffff"
+          ctx.fillText(villain.emoji, enemy.x, enemy.y)
+        }
+
         // Health bar
         const barWidth = enemy.size + 10
         const barHeight = 6
@@ -609,6 +629,17 @@ export default function TowerDefenseGame({
     gameLoopRef.current = requestAnimationFrame(gameLoop)
   }, [gameState, enemies, projectiles, placedGears, grid, wave, maxWaves, health])
 
+  const canUseSuperpower = (superpower: Superpower) => {
+    const cooldownRemaining = superpowerCooldowns[superpower.id] || 0
+    return currency >= superpower.cost && cooldownRemaining === 0
+  }
+
+  const handleSuperpowerClick = (power: Superpower) => {
+    if (canUseSuperpower(power)) {
+      useSuperpower(power)
+    }
+  }
+
   useEffect(() => {
     if (enemies.length === 0) {
       spawnWave()
@@ -654,19 +685,8 @@ export default function TowerDefenseGame({
     onFightEnd(score, earnedCurrency)
   }
 
-  const canUseSuperpower = (superpower: Superpower) => {
-    const cooldownRemaining = superpowerCooldowns[superpower.id] || 0
-    return currency >= superpower.cost && cooldownRemaining === 0
-  }
-
-  const handleSuperpowerClick = (power: Superpower) => {
-    if (canUseSuperpower(power)) {
-      useSuperpower(power)
-    }
-  }
-
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
       {/* UI Header */}
       <div className="flex items-center justify-between p-4 bg-black/50 backdrop-blur-sm">
         <div className="flex items-center gap-4">
@@ -697,14 +717,14 @@ export default function TowerDefenseGame({
         </div>
       </div>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         {/* Game Canvas */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center p-4">
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="border-2 border-gray-600 rounded-lg shadow-2xl"
+            className="border-2 border-gray-600 rounded-lg shadow-2xl max-w-full max-h-full"
             onClick={(e) => {
               if (!selectedCharacter) return
 

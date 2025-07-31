@@ -2,175 +2,152 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sword, Settings, Trophy, Coins, Play, Zap, Shield } from "lucide-react"
+import { Sword, Shield, Coins, Trophy, Settings, Play } from "lucide-react"
 
 interface LandingPageProps {
   onStartFight: () => void
   onGearSetup: () => void
-  onCharacterSelect: () => void
-  score: number
+  onViewScore: () => void
   currency: number
 }
 
-export default function LandingPage({
-  onStartFight,
-  onGearSetup,
-  onCharacterSelect,
-  score,
-  currency,
-}: LandingPageProps) {
+export default function LandingPage({ onStartFight, onGearSetup, onViewScore, currency }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-yellow-400 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-red-400 rounded-full opacity-10 animate-bounce"></div>
-        <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-green-400 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-40 right-1/3 w-28 h-28 bg-blue-400 rounded-full opacity-10 animate-bounce"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-24 h-24 bg-blue-500/20 rounded-full blur-lg animate-bounce"></div>
+        <div className="absolute bottom-32 left-1/3 w-40 h-40 bg-red-500/10 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-28 h-28 bg-yellow-500/20 rounded-full blur-xl animate-bounce"></div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
         {/* Game Title */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-red-500 rounded-full flex items-center justify-center mr-4 animate-spin-slow">
-              <Zap className="w-10 h-10 text-white" />
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="relative">
+              <Sword className="w-16 h-16 text-red-400 animate-pulse" />
+              <div className="absolute inset-0 w-16 h-16 text-red-400 animate-spin opacity-30">
+                <Settings className="w-16 h-16" />
+              </div>
             </div>
-            <h1 className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-purple-500 animate-pulse">
-              GearFight
+            <h1 className="text-7xl font-bold bg-gradient-to-r from-red-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+              GEARFIGHT
             </h1>
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center ml-4 animate-spin-slow">
-              <Shield className="w-10 h-10 text-white" />
+            <div className="relative">
+              <Shield className="w-16 h-16 text-blue-400 animate-pulse" />
+              <div className="absolute inset-0 w-16 h-16 text-blue-400 animate-spin opacity-30">
+                <Settings className="w-16 h-16" />
+              </div>
             </div>
           </div>
-          <p className="text-2xl text-gray-300 font-semibold">Strategic Tower Defense Arena</p>
-          <p className="text-lg text-gray-400 mt-2">Place your gears, defend your base, conquer the waves!</p>
+          <p className="text-2xl text-gray-300 font-semibold">
+            Strategic Tower Defense • Epic Battles • Legendary Gear
+          </p>
         </div>
 
-        {/* Stats Display */}
-        <div className="flex gap-6 mb-12">
-          <Card className="bg-black/30 border-yellow-500/50 backdrop-blur-sm">
-            <CardContent className="flex items-center gap-3 p-6">
-              <Trophy className="text-yellow-400 w-8 h-8" />
-              <div>
-                <p className="text-yellow-400 font-bold text-xl">{score}</p>
-                <p className="text-gray-300 text-sm">Best Score</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-black/30 border-green-500/50 backdrop-blur-sm">
-            <CardContent className="flex items-center gap-3 p-6">
-              <Coins className="text-green-400 w-8 h-8" />
-              <div>
-                <p className="text-green-400 font-bold text-xl">{currency}</p>
-                <p className="text-gray-300 text-sm">Coins</p>
-              </div>
+        {/* Currency Display */}
+        <div className="mb-8">
+          <Card className="bg-black/40 border-yellow-500/50 backdrop-blur-sm">
+            <CardContent className="flex items-center gap-3 p-4">
+              <Coins className="w-8 h-8 text-yellow-400" />
+              <span className="text-2xl font-bold text-white">{currency}</span>
+              <span className="text-yellow-400">Coins</span>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
-          <Card className="bg-black/40 border-red-500/50 hover:border-red-400 transition-all duration-300 hover:scale-105 backdrop-blur-sm group cursor-pointer">
-            <CardHeader className="text-center pb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse">
-                <Play className="text-white w-8 h-8" />
+        {/* Main Menu Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <Card className="bg-black/40 border-red-500/50 hover:border-red-400 transition-all duration-300 hover:scale-105 cursor-pointer backdrop-blur-sm group">
+            <CardHeader className="text-center">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center group-hover:from-red-500 group-hover:to-red-600 transition-all">
+                <Play className="w-10 h-10 text-white" />
               </div>
-              <CardTitle className="text-2xl text-red-400 group-hover:text-red-300">Battle Arena</CardTitle>
+              <CardTitle className="text-2xl text-white">Start Battle</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p className="text-gray-300 mb-6 text-lg">Jump into intense tower defense battles!</p>
+              <p className="text-gray-300 mb-4">Jump into epic tower defense battles!</p>
               <Button
                 onClick={onStartFight}
-                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-3 text-lg shadow-lg hover:shadow-red-500/25"
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-3"
               >
-                START FIGHT!
+                FIGHT NOW!
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 border-blue-500/50 hover:border-blue-400 transition-all duration-300 hover:scale-105 backdrop-blur-sm group cursor-pointer">
-            <CardHeader className="text-center pb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse">
-                <Settings className="text-white w-8 h-8" />
+          <Card className="bg-black/40 border-purple-500/50 hover:border-purple-400 transition-all duration-300 hover:scale-105 cursor-pointer backdrop-blur-sm group">
+            <CardHeader className="text-center">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full flex items-center justify-center group-hover:from-purple-500 group-hover:to-purple-600 transition-all">
+                <Settings className="w-10 h-10 text-white" />
               </div>
-              <CardTitle className="text-2xl text-blue-400 group-hover:text-blue-300">Characters</CardTitle>
+              <CardTitle className="text-2xl text-white">Gear Setup</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p className="text-gray-300 mb-6 text-lg">Choose your fighter and customize your loadout.</p>
-              <Button
-                onClick={onCharacterSelect}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 text-lg shadow-lg hover:shadow-blue-500/25"
-              >
-                SELECT HERO
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-black/40 border-green-500/50 hover:border-green-400 transition-all duration-300 hover:scale-105 backdrop-blur-sm group cursor-pointer">
-            <CardHeader className="text-center pb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse">
-                <Sword className="text-white w-8 h-8" />
-              </div>
-              <CardTitle className="text-2xl text-green-400 group-hover:text-green-300">Gear Store</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-300 mb-6 text-lg">Upgrade your equipment and unlock new abilities.</p>
+              <p className="text-gray-300 mb-4">Choose heroes and upgrade your gear!</p>
               <Button
                 onClick={onGearSetup}
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold py-3 text-lg shadow-lg hover:shadow-green-500/25"
+                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold py-3"
               >
-                GEAR UP
+                CUSTOMIZE
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-black/40 border-blue-500/50 hover:border-blue-400 transition-all duration-300 hover:scale-105 cursor-pointer backdrop-blur-sm group">
+            <CardHeader className="text-center">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 transition-all">
+                <Trophy className="w-10 h-10 text-white" />
+              </div>
+              <CardTitle className="text-2xl text-white">Achievements</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-gray-300 mb-4">View your scores and achievements!</p>
+              <Button
+                onClick={onViewScore}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3"
+              >
+                VIEW STATS
               </Button>
             </CardContent>
           </Card>
         </div>
 
         {/* Game Features */}
-        <div className="mt-16 text-center">
-          <h3 className="text-3xl font-bold text-white mb-8">Game Features</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">⚔️</span>
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-black/30 border-gray-500/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-3xl text-center text-white mb-6">🎮 Game Features</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">⚔️</div>
+                  <h3 className="text-white font-bold mb-2">Epic Heroes</h3>
+                  <p className="text-gray-300 text-sm">Choose from powerful warriors, mages, and archers</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl mb-2">👹</div>
+                  <h3 className="text-white font-bold mb-2">Villain Hordes</h3>
+                  <p className="text-gray-300 text-sm">Battle goblins, orcs, trolls, and mighty dragons</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl mb-2">🛡️</div>
+                  <h3 className="text-white font-bold mb-2">Strategic Gear</h3>
+                  <p className="text-gray-300 text-sm">Upgrade weapons, armor, and abilities</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl mb-2">⚡</div>
+                  <h3 className="text-white font-bold mb-2">Superpowers</h3>
+                  <p className="text-gray-300 text-sm">Unleash devastating rockets, lightning, and more</p>
+                </div>
               </div>
-              <p className="text-gray-300 font-semibold">Strategic Combat</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <p className="text-gray-300 font-semibold">Tower Defense</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">⚡</span>
-              </div>
-              <p className="text-gray-300 font-semibold">Superpowers</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl">🏆</span>
-              </div>
-              <p className="text-gray-300 font-semibold">Epic Rewards</p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
-        }
-      `}</style>
     </div>
   )
 }
