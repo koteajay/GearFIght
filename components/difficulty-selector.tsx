@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Skull, Shield, Zap } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ArrowLeft, Skull, Shield, Sword } from "lucide-react"
 
 interface DifficultySelectorProps {
   onDifficultySelect: (difficulty: "easy" | "medium" | "hard") => void
@@ -12,77 +13,118 @@ interface DifficultySelectorProps {
 const difficulties = [
   {
     id: "easy" as const,
-    name: "Easy",
+    name: "Recruit",
     icon: Shield,
-    color: "from-green-600 to-green-700",
+    color: "text-green-400",
     borderColor: "border-green-500/50",
-    waves: 3,
-    description: "Perfect for beginners. Fewer enemies, more time to strategize.",
-    features: ["3 Waves", "Weak Enemies", "Bonus Currency"],
+    description: "Perfect for beginners",
+    waves: 5,
+    enemyStrength: "Weak",
+    rewards: "Standard",
+    features: ["Slower enemy spawn rate", "Weaker enemy units", "More starting currency", "5 waves total"],
   },
   {
     id: "medium" as const,
-    name: "Medium",
-    icon: Zap,
-    color: "from-yellow-600 to-orange-600",
+    name: "Veteran",
+    icon: Sword,
+    color: "text-yellow-400",
     borderColor: "border-yellow-500/50",
-    waves: 6,
-    description: "Balanced challenge. Boss appears at wave 6.",
-    features: ["6 Waves", "Mixed Enemies", "Boss at Wave 6"],
+    description: "Balanced challenge",
+    waves: 10,
+    enemyStrength: "Normal",
+    rewards: "Increased",
+    features: ["Moderate enemy spawn rate", "Standard enemy units", "Normal starting currency", "10 waves total"],
   },
   {
     id: "hard" as const,
-    name: "Hard",
+    name: "Champion",
     icon: Skull,
-    color: "from-red-600 to-red-700",
+    color: "text-red-400",
     borderColor: "border-red-500/50",
-    waves: 12,
-    description: "Ultimate challenge! Multiple bosses and relentless waves.",
-    features: ["12 Waves", "Strong Enemies", "Boss Every 6 Waves"],
+    description: "For experienced warriors",
+    waves: 15,
+    enemyStrength: "Strong",
+    rewards: "Maximum",
+    features: ["Fast enemy spawn rate", "Powerful enemy units", "Limited starting currency", "15 waves total"],
   },
 ]
 
 export default function DifficultySelector({ onDifficultySelect, onBack }: DifficultySelectorProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center mb-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="max-w-6xl w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
           <Button onClick={onBack} variant="ghost" className="text-white hover:bg-white/20">
             <ArrowLeft className="mr-2" />
             Back
           </Button>
-          <h1 className="text-4xl font-bold text-white ml-8">Choose Difficulty</h1>
+          <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+            Choose Your Challenge
+          </h1>
+          <div className="w-20" /> {/* Spacer */}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Difficulty Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {difficulties.map((difficulty) => {
-            const Icon = difficulty.icon
+            const IconComponent = difficulty.icon
             return (
               <Card
                 key={difficulty.id}
-                className={`bg-black/40 ${difficulty.borderColor} border-2 hover:border-white/50 transition-all duration-300 hover:scale-105 cursor-pointer backdrop-blur-sm`}
+                className={`bg-black/40 border-2 ${difficulty.borderColor} hover:border-opacity-100 transition-all duration-300 cursor-pointer transform hover:scale-105 backdrop-blur-sm`}
                 onClick={() => onDifficultySelect(difficulty.id)}
               >
-                <CardHeader className="text-center">
-                  <div
-                    className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center bg-gradient-to-r ${difficulty.color}`}
-                  >
-                    <Icon className="w-10 h-10 text-white" />
+                <CardHeader className="text-center pb-4">
+                  <div className="flex justify-center mb-4">
+                    <IconComponent className={`w-16 h-16 ${difficulty.color}`} />
                   </div>
-                  <CardTitle className="text-3xl text-white">{difficulty.name}</CardTitle>
+                  <CardTitle className={`text-2xl ${difficulty.color}`}>{difficulty.name}</CardTitle>
+                  <p className="text-gray-400 text-sm">{difficulty.description}</p>
                 </CardHeader>
-                <CardContent className="text-center space-y-4">
-                  <p className="text-gray-300 text-lg">{difficulty.description}</p>
+                <CardContent className="space-y-4">
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white">{difficulty.waves}</div>
+                      <div className="text-xs text-gray-400">Waves</div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`text-sm font-bold ${difficulty.color}`}>{difficulty.enemyStrength}</div>
+                      <div className="text-xs text-gray-400">Enemies</div>
+                    </div>
+                  </div>
+
+                  {/* Features */}
                   <div className="space-y-2">
                     {difficulty.features.map((feature, index) => (
-                      <div key={index} className="flex items-center justify-center gap-2">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                        <span className="text-white">{feature}</span>
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${difficulty.color.replace("text-", "bg-")}`} />
+                        <span className="text-sm text-gray-300">{feature}</span>
                       </div>
                     ))}
                   </div>
+
+                  {/* Rewards Badge */}
+                  <div className="text-center">
+                    <Badge variant="outline" className={`${difficulty.color} ${difficulty.borderColor}`}>
+                      {difficulty.rewards} Rewards
+                    </Badge>
+                  </div>
+
+                  {/* Select Button */}
                   <Button
-                    className={`w-full bg-gradient-to-r ${difficulty.color} hover:opacity-90 text-white font-bold py-3 text-lg`}
+                    className={`w-full bg-gradient-to-r ${
+                      difficulty.id === "easy"
+                        ? "from-green-600 to-green-700 hover:from-green-500 hover:to-green-600"
+                        : difficulty.id === "medium"
+                          ? "from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500"
+                          : "from-red-600 to-red-700 hover:from-red-500 hover:to-red-600"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDifficultySelect(difficulty.id)
+                    }}
                   >
                     Select {difficulty.name}
                   </Button>
@@ -92,30 +134,23 @@ export default function DifficultySelector({ onDifficultySelect, onBack }: Diffi
           })}
         </div>
 
-        <div className="mt-12 text-center">
-          <Card className="bg-black/40 border-purple-500/50 max-w-2xl mx-auto">
-            <CardContent className="p-6">
-              <h3 className="text-2xl font-bold text-purple-400 mb-4">💡 Pro Tips</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                <div>
-                  <h4 className="text-white font-semibold mb-2">🎯 Strategy</h4>
-                  <p className="text-gray-300 text-sm">Place characters near enemy paths for maximum damage</p>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold mb-2">⚡ Superpowers</h4>
-                  <p className="text-gray-300 text-sm">Save superpowers for boss waves and emergencies</p>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold mb-2">💰 Economy</h4>
-                  <p className="text-gray-300 text-sm">Balance spending on characters vs superpowers</p>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold mb-2">🛡️ Defense</h4>
-                  <p className="text-gray-300 text-sm">Don't let enemies reach your base!</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Instructions */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-400 mb-4">
+            Choose your difficulty level carefully! Higher difficulties offer greater rewards but pose more challenging
+            battles.
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Badge variant="outline" className="text-green-400 border-green-400">
+              Easy: Great for Learning
+            </Badge>
+            <Badge variant="outline" className="text-yellow-400 border-yellow-400">
+              Medium: Balanced Experience
+            </Badge>
+            <Badge variant="outline" className="text-red-400 border-red-400">
+              Hard: Maximum Challenge
+            </Badge>
+          </div>
         </div>
       </div>
     </div>

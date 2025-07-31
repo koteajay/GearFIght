@@ -1,87 +1,80 @@
 "use client"
+import GearFightGame from "@/components/gear-fight-game"
+import type { Character, Gear } from "@/types/game"
 
-import { useState } from "react"
-import LandingPage from "@/components/landing-page"
-import CharacterSelector from "@/components/character-selector"
-import GearSetup from "@/components/gear-setup"
-import DifficultySelector from "@/components/difficulty-selector"
-import TowerDefenseGame from "@/components/tower-defense-game"
-import type { GameState, Character, Gear } from "@/types/game"
+const defaultCharacters: Character[] = [
+  {
+    id: "warrior",
+    name: "Warrior",
+    baseHealth: 100,
+    baseSpeed: 50,
+    baseDamage: 25,
+    color: "#ef4444",
+    description: "Strong melee fighter with high damage",
+  },
+  {
+    id: "speedster",
+    name: "Speedster",
+    baseHealth: 70,
+    baseSpeed: 80,
+    baseDamage: 20,
+    color: "#22c55e",
+    description: "Fast attacker with quick movements",
+  },
+  {
+    id: "tank",
+    name: "Tank",
+    baseHealth: 150,
+    baseSpeed: 30,
+    baseDamage: 30,
+    color: "#3b82f6",
+    description: "Heavy defender with massive health",
+  },
+]
+
+const availableGear: Gear[] = [
+  {
+    id: "iron-sword",
+    name: "Iron Sword",
+    type: "weapon",
+    damageBoost: 15,
+    speedBoost: 0,
+    healthBoost: 0,
+    cost: 50,
+    description: "Sharp blade that increases attack power",
+  },
+  {
+    id: "power-gloves",
+    name: "Power Gloves",
+    type: "weapon",
+    damageBoost: 25,
+    speedBoost: 5,
+    healthBoost: 0,
+    cost: 80,
+    description: "Magical gloves that boost strength and speed",
+  },
+  {
+    id: "armor-vest",
+    name: "Armor Vest",
+    type: "armor",
+    damageBoost: 0,
+    speedBoost: -10,
+    healthBoost: 50,
+    cost: 60,
+    description: "Heavy protection that increases health",
+  },
+  {
+    id: "speed-boots",
+    name: "Speed Boots",
+    type: "speed",
+    damageBoost: 0,
+    speedBoost: 20,
+    healthBoost: 0,
+    cost: 40,
+    description: "Lightweight boots for faster movement",
+  },
+]
 
 export default function Home() {
-  const [gameState, setGameState] = useState<GameState>("landing")
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
-  const [equippedGear, setEquippedGear] = useState<Gear[]>([])
-  const [currency, setCurrency] = useState(200)
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy")
-
-  const handleCharacterSelect = (character: Character) => {
-    setSelectedCharacter(character)
-    setGameState("gear")
-  }
-
-  const handleGearEquip = (gear: Gear[]) => {
-    setEquippedGear(gear)
-  }
-
-  const handleCurrencyChange = (newCurrency: number) => {
-    setCurrency(newCurrency)
-  }
-
-  const handleDifficultySelect = (selectedDifficulty: "easy" | "medium" | "hard") => {
-    setDifficulty(selectedDifficulty)
-    setGameState("fighting")
-  }
-
-  const handleFightEnd = (score: number, earnedCurrency: number) => {
-    setCurrency(currency + earnedCurrency)
-    setGameState("landing")
-  }
-
-  const handleStartFight = () => {
-    setGameState("difficulty")
-  }
-
-  return (
-    <div className="min-h-screen">
-      {gameState === "landing" && (
-        <LandingPage
-          onStartFight={() => setGameState("character")}
-          onGearSetup={() => setGameState("character")}
-          onViewScore={() => {}}
-          currency={currency}
-        />
-      )}
-
-      {gameState === "character" && (
-        <CharacterSelector onCharacterSelect={handleCharacterSelect} onBack={() => setGameState("landing")} />
-      )}
-
-      {gameState === "gear" && (
-        <GearSetup
-          character={selectedCharacter}
-          equippedGear={equippedGear}
-          currency={currency}
-          onGearEquip={handleGearEquip}
-          onCurrencyChange={handleCurrencyChange}
-          onStartFight={handleStartFight}
-          onBack={() => setGameState("character")}
-        />
-      )}
-
-      {gameState === "difficulty" && (
-        <DifficultySelector onDifficultySelect={handleDifficultySelect} onBack={() => setGameState("gear")} />
-      )}
-
-      {gameState === "fighting" && selectedCharacter && (
-        <TowerDefenseGame
-          character={selectedCharacter}
-          equippedGear={equippedGear}
-          difficulty={difficulty}
-          onFightEnd={handleFightEnd}
-          onBack={() => setGameState("landing")}
-        />
-      )}
-    </div>
-  )
+  return <GearFightGame />
 }
